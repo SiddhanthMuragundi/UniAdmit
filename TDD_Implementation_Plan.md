@@ -256,6 +256,7 @@ While this document doesn't include actual test implementations, it provides a c
 
 **Document Control:**
 - Created: September 6, 2025
-- Author: Development Team
+- Author: Siddhanth Muragundi
 - Version: 1.0
 - Status: Draft
+
