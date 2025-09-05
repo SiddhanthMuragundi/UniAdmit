@@ -334,11 +334,9 @@ For more detailed information, refer to the following documents:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contributors
+## Author
 
-- Development Team
-- University Admission Office (Requirements)
-- IT Department (Infrastructure)
+**Siddhanth Muragundi**
 
 ---
 
