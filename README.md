@@ -4,14 +4,16 @@
 
 UniAdmit is a comprehensive web-based university admission management system designed to streamline the application process for both students and administrative staff. The system provides an end-to-end solution for application submission, review, and management.
 
-### Key Features
+## Key Features
 
-- **User Authentication**: Secure registration and login for students and administrators
-- **Multi-step Application Process**: Intuitive form with progress tracking
-- **Document Management**: Upload, store, and retrieve application documents
-- **Application Tracking**: Real-time status updates for applicants
-- **Admin Dashboard**: Comprehensive tools for application review and management
-- **Admission Letter Generation**: Automatic PDF generation for approved applications
+- **User Authentication**: Secure registration and login for students and administrators using Flask-Security-Too
+- **Multi-step Application Process**: 4-step intuitive form with progress tracking and draft saving
+- **Document Management**: Upload, store (binary in database), and retrieve application documents (PDF/JPG/PNG, 10MB limit)
+- **Application Tracking**: Real-time status updates for applicants (Draft → Pending → Approved/Rejected)
+- **Admin Dashboard**: Comprehensive tools with statistics, application review, user management, and bulk operations
+- **Admission Letter Generation**: Automatic PDF generation using ReportLab for approved applications
+- **Single Pending Application**: System prevents multiple pending applications per student
+- **Role-based Access**: Student and Administrator roles with appropriate permissions
 
 ## Installation Instructions
 
@@ -174,15 +176,19 @@ Then open your browser to http://localhost:5173
 
 ### Initial Admin Setup
 
-After starting the backend server, the initial admin user will be automatically created with these credentials:
+After starting the backend server, the initial admin user will be **automatically created** with these default credentials:
 - Email: admin@email.com
 - Password: adminpassword
 
-If you need to manually create an admin user:
+**Important**: This admin account is created during the first application startup. You can customize these credentials by setting environment variables in a `.env` file:
 ```
-cd backend
-python -c "from app import create_app; from app.models import db, User, Role; from flask_security.utils import hash_password; import uuid; app = create_app(); with app.app_context(): admin_role = Role.query.filter_by(name='admin').first() or Role(name='admin', description='Administrator'); db.session.add(admin_role); db.session.commit(); admin = User(name='Admin User', email='admin@email.com', phone='9876543210', password=hash_password('adminpassword'), fs_uniquifier=str(uuid.uuid4()), address='Admin Address', country='Country', state='State', district='District', pincode='123456', active=True); admin.roles.append(admin_role); db.session.add(admin); db.session.commit(); print('Admin user created successfully')"
+ADMIN_NAME=Your Admin Name
+ADMIN_EMAIL=your-admin@email.com
+ADMIN_PASSWORD=your-secure-password
+ADMIN_PHONE=1234567890
 ```
+
+If you need to manually create additional admin users, existing admins can use the admin panel's user management features.
 
 ## Usage Instructions
 
@@ -225,14 +231,17 @@ python -c "from app import create_app; from app.models import db, User, Role; fr
 
 3. **User Management**:
    - From the admin dashboard, navigate to "User Management"
-   - View all registered users
-   - Activate/deactivate accounts
-   - Assign or modify roles
+   - View all registered users with search and filtering
+   - Activate/deactivate user accounts
+   - Create additional admin users
+   - Monitor user activity and registration trends
 
-4. **System Configuration**:
-   - Update application deadlines
-   - Configure system-wide announcements
-   - Adjust document upload limits
+4. **Dashboard Analytics**:
+   - View comprehensive statistics (total/pending/approved/rejected applications)
+   - Monitor recent activity and trends
+   - Track top courses and application patterns
+   - Review system health metrics
+   - Access monthly application and user registration trends
 
 ## Testing
 
@@ -248,37 +257,50 @@ These documents outline how tests would be structured and implemented for both b
 
 ### Backend
 
-- **Framework**: Flask (Python)
-- **ORM**: SQLAlchemy
-- **Database**: MySQL
-- **Authentication**: Flask-Security with JWT tokens
-- **PDF Generation**: ReportLab
-- **File Handling**: Built-in binary storage
+- **Framework**: Flask (Python) with application factory pattern
+- **ORM**: SQLAlchemy with Flask-SQLAlchemy
+- **Database**: MySQL 8.0+ with automatic database creation
+- **Authentication**: Flask-Security-Too with Argon2 password hashing and token-based authentication
+- **PDF Generation**: ReportLab for admission letter generation
+- **File Handling**: Binary storage directly in MySQL database (LargeBinary fields)
+- **CORS**: Flask-CORS for cross-origin requests
 
 ### Frontend
 
-- **Framework**: Vue.js 3
-- **Router**: Vue Router
-- **UI Components**: Bootstrap 5
-- **HTTP Client**: Axios
+- **Framework**: Vue.js 3 with Composition API
+- **Router**: Vue Router for navigation
+- **UI Components**: Bootstrap 5 for responsive design
+- **HTTP Client**: Axios for API communication
+- **State Management**: Vue 3 reactive state (ref/reactive)
+
+### Infrastructure
+
+- **Database**: MySQL with automatic schema creation
+- **File Storage**: Binary data stored in database (max 10MB per file)
+- **Authentication Tokens**: Secure token-based session management
+- **Development Server**: Flask development server (port 5000) + Vite dev server (port 5173)
 
 ## Assumptions and Design Decisions
 
 1. **User Roles**: The system assumes two primary user roles: students and administrators. Additional roles could be added in future versions.
 
-2. **Document Storage**: Documents are stored directly in the database as binary data for simplicity. In a production environment, a dedicated file storage service might be more appropriate.
+2. **Single Administrator**: The system is designed with a single administrator account that is automatically created when the application is first launched. This simplifies initial setup and user management for smaller institutions.
 
-3. **Application States**: Applications follow a simple workflow: draft → pending → approved/rejected. More complex workflows could be implemented based on institutional requirements.
+3. **Single Active Application**: Students can have only one pending application at a time. This simplifies tracking and prevents duplicate submissions while an application is under review.
 
-4. **Single Active Application**: Students can have only one active application at a time. This simplifies tracking and prevents duplicate submissions.
+4. **Document Storage**: Documents are stored directly in the database as binary data for simplicity. In a production environment, a dedicated file storage service might be more appropriate.
 
-5. **PDF Generation**: Admission letters are generated as PDFs using ReportLab. The design assumes a standard format for all letters.
+5. **Application States**: Applications follow a simple workflow: draft → pending → approved/rejected. More complex workflows could be implemented based on institutional requirements.
 
-6. **Email Notifications**: The system is designed with hooks for email notifications, but actual email sending is commented out in the code. In a production environment, a proper email service would be integrated.
+6. **PDF Generation**: Admission letters are generated as PDFs using ReportLab. The design assumes a standard format for all letters.
 
-7. **Academic Details**: The system collects basic academic information (10th/12th grades, previous qualification). Institutions may need to customize these fields based on their specific requirements.
+7. **No Email Integration**: The system displays email addresses in the interface and PDFs but does not implement actual email sending functionality. In a production environment, a proper email service would need to be integrated for notifications.
 
-8. **Security Considerations**: The implementation uses JWT tokens for authentication and includes basic security measures. A production deployment would require additional security hardening.
+8. **Academic Details**: The system collects basic academic information (10th/12th grades, previous qualification). Institutions may need to customize these fields based on their specific requirements.
+
+9. **Security Implementation**: The system uses Flask-Security-Too with token-based authentication and role-based access control. Additional security hardening would be required for production deployment.
+
+10. **Development Process**: Any assumptions or design decisions made during the development process were guided by modern web development best practices, with occasional assistance from AI tools for code optimization and documentation refinement.
 
 ## Documentation
 

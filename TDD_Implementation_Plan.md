@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the Test-Driven Development (TDD) approach that would be implemented for the UniAdmit University Admission Management System. While actual test code has not been implemented, this document serves as a guide for how testing would be structured and executed in a real-world implementation.
+This document outlines the Test-Driven Development (TDD) approach that would be implemented for the UniAdmit University Admission Management System. Based on the actual implementation using Flask-Security-Too, Vue.js 3, and MySQL, this document serves as a comprehensive guide for how testing would be structured and executed in a real-world implementation.
 
 ## What is Test-Driven Development?
 
@@ -29,12 +29,14 @@ The backend tests would be organized into the following categories:
 #### 1. Unit Tests
 
 - **Authentication Tests**
-  - User registration with valid data
-  - Registration validation (required fields, email format, phone format)
-  - Prevention of duplicate registrations
-  - User login with valid credentials
+  - User registration with valid data and automatic student role assignment
+  - Registration validation (required fields, email format, phone format, uniqueness)
+  - Prevention of duplicate registrations (email and phone)
+  - User login with valid credentials and token generation
   - Login validation and error handling
   - User logout and session invalidation
+  - Admin creation by existing admin users
+  - Token expiration and refresh mechanisms
 
 - **Application Management Tests**
   - Saving application drafts
@@ -43,25 +45,32 @@ The backend tests would be organized into the following categories:
   - Submitting complete applications
   - Application validation
   - Status updates
+  - Prevention of multiple pending applications per student
 
 - **Document Management Tests**
-  - Document upload validation (file formats, size limits)
-  - Document storage and retrieval
+  - Document upload validation (file formats: PDF, JPG, PNG; size limits: 10MB)
+  - Binary storage and retrieval from database
   - Access control for document downloads
   - Offer letter generation
 
 - **Administrative Tests**
-  - Application review functionality
-  - Bulk operations
-  - User management functions
-  - System configuration
+  - Application review functionality with status updates
+  - Bulk operations and error handling
+  - User management functions (activate/deactivate, admin creation)
+  - Admin dashboard statistics and analytics
+  - PDF admission letter generation using ReportLab
+  - System health monitoring and performance metrics
+  - Monthly trend analysis and reporting
 
 #### 2. Integration Tests
 
-- End-to-end workflow testing
-- API endpoint testing with realistic data
-- Database integration testing
-- Authentication flow testing
+- End-to-end workflow testing (registration → application → review → approval)
+- API endpoint testing with realistic data and authentication tokens
+- MySQL database integration testing with automatic database creation
+- Flask-Security-Too authentication flow testing
+- File upload and download integration testing
+- Admin dashboard data aggregation and statistics
+- Cross-browser compatibility testing
 
 ### Frontend Tests (Vue.js)
 
@@ -82,14 +91,16 @@ The frontend tests would be organized into the following categories:
   - Document upload interface
 
 - **Dashboard Components**
-  - Status display
-  - Application list rendering
-  - Action button functionality
-  - Statistics and charts
+  - Student dashboard with application status display
+  - Admin dashboard with comprehensive statistics
+  - Application list rendering with filtering and search
+  - Action button functionality and role-based access
+  - Statistics charts and real-time data updates
+  - Responsive design across different screen sizes
 
-#### 2. Store Tests (Pinia)
+#### 2. Store Tests (Vue 3 Reactive State)
 
-- Authentication store state management
+- Authentication state management
 - Application form state management
 - Data fetching and API interactions
 - Error handling
@@ -133,6 +144,35 @@ def test_user_registration():
     assert user is not None
     assert user.name == 'Test User'
     assert user.roles[0].name == 'student'
+    
+def test_prevent_multiple_pending_applications():
+    # Arrange - create user with pending application
+    user = create_test_user()
+    create_pending_application(user.id)
+    
+    # Act - try to submit another application
+    response = client.post('/api/application/submit', 
+                         headers={'Authentication-Token': user.token},
+                         data=valid_application_data)
+    
+    # Assert - should be rejected
+    assert response.status_code == 400
+    assert 'already have a pending application' in response.json['error']
+
+def test_admin_dashboard_statistics():
+    # Arrange - create test data
+    create_test_applications_with_various_statuses()
+    
+    # Act - get admin dashboard
+    response = client.get('/api/auth/admin/dashboard',
+                         headers={'Authentication-Token': admin_token})
+    
+    # Assert - verify statistics
+    assert response.status_code == 200
+    data = response.json
+    assert 'user_stats' in data
+    assert 'application_stats' in data
+    assert data['application_stats']['total_applications'] > 0
 ```
 
 ### Frontend Test Example (Vue.js/Vitest)
@@ -195,17 +235,22 @@ describe('Login Component', () => {
 
 ### Backend Testing Tools
 
-- **pytest**: Main testing framework for Python
-- **pytest-cov**: For test coverage reporting
-- **Flask Test Client**: For API endpoint testing
-- **unittest.mock**: For mocking dependencies
+- **pytest**: Main testing framework for Python with fixtures and parameterized tests
+- **pytest-cov**: For test coverage reporting and analysis
+- **Flask Test Client**: For API endpoint testing with authentication
+- **unittest.mock**: For mocking dependencies and external services
+- **SQLAlchemy Test Utilities**: For database testing with MySQL and transaction rollback
+- **pytest-flask**: Flask-specific testing utilities and fixtures
+- **Factory Boy**: For creating test data and model factories
 
 ### Frontend Testing Tools
 
-- **Vitest**: Modern test runner for Vue.js applications
-- **Vue Test Utils**: Official unit testing library for Vue
-- **JSDOM**: For simulating a browser environment
-- **MSW (Mock Service Worker)**: For API mocking
+- **Vitest**: Modern test runner for Vue.js applications with fast execution
+- **Vue Test Utils**: Official unit testing library for Vue 3 components
+- **JSDOM**: For simulating a browser environment in Node.js
+- **MSW (Mock Service Worker)**: For API mocking and intercepting HTTP requests
+- **@testing-library/vue**: For testing Vue components with user-centric approach
+- **Cypress**: For end-to-end testing and integration testing
 
 ## Test Implementation Strategy
 
@@ -238,13 +283,15 @@ For a real implementation of the UniAdmit system, the testing strategy would fol
 
 ## Test Coverage Goals
 
-- **Backend**: Minimum 80% code coverage
-- **Frontend**: Minimum 70% component coverage
+- **Backend**: Minimum 85% code coverage with focus on critical business logic
+- **Frontend**: Minimum 75% component coverage with emphasis on user interactions
 - **Critical Paths**: 100% test coverage for:
-  - Authentication flows
-  - Application submission
-  - Document management
-  - Administrative approval process
+  - Authentication flows (registration, login, role assignment)
+  - Application submission and status management
+  - Document management and security
+  - Administrative approval process and user management
+  - Database operations and data integrity
+  - Security and authorization checks
 
 ## Conclusion
 
@@ -259,4 +306,3 @@ While this document doesn't include actual test implementations, it provides a c
 - Author: Siddhanth Muragundi
 - Version: 1.0
 - Status: Draft
-

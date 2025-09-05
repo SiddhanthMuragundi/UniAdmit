@@ -19,13 +19,15 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 - Reduce manual paperwork and processing time
 - Provide transparent application tracking for students
 - Enable efficient application review and management for administrators
-- Generate comprehensive reports and analytics
+- Generate professional admission letters automatically
+- Implement secure role-based access control
+- Support concurrent multi-user access with real-time updates
 
 ### 1.3 System Overview
 - **Frontend:** Vue.js 3 with Bootstrap 5 for responsive UI
 - **Backend:** Flask with SQLAlchemy ORM and MySQL database
-- **Authentication:** Flask-Security with role-based access control
-- **File Management:** Binary storage for document uploads
+- **Authentication:** Flask-Security-Too with token-based authentication and role-based access control
+- **File Management:** Binary storage for document uploads directly in database
 - **PDF Generation:** ReportLab for official admission letters
 
 ---
@@ -46,10 +48,10 @@ The UniAdmit University Admission Management System is a comprehensive web-based
    - Manage application workflow
 
 3. **System Administrators**
-   - Manage user accounts
-   - Configure system settings
-   - Monitor system performance
-   - Maintain data integrity
+   - Manage user accounts and permissions
+   - Create additional administrator accounts
+   - Monitor system performance and user activity
+   - Maintain data integrity and system health
 
 ---
 
@@ -58,37 +60,43 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 ### 3.1 User Authentication and Authorization
 
 #### 3.1.1 User Registration (FR-001)
-**Description:** Allow new users to create accounts in the system.
+**Description:** Allow new users to create student accounts in the system with automatic role assignment.
 
 **Requirements:**
 - Users must provide: full name, email, phone number, password, complete address
 - Email must be unique in the system
-- Phone number must be exactly 10 digits
+- Phone number must be exactly 10 digits and unique
 - Password must be minimum 6 characters
 - Address fields: street address, country (text input), state, district, PIN code
 - Account activation upon successful registration
+- Automatic assignment of "student" role
+- Server-side validation for all fields
 
 **Acceptance Criteria:**
-- Registration form validates all required fields
-- System prevents duplicate email registrations
+- Registration form validates all required fields with real-time feedback
+- System prevents duplicate email and phone number registrations
 - User receives confirmation upon successful registration
 - Account is immediately active for login
+- Student role is automatically assigned
+- Password is securely hashed using Argon2
 
 #### 3.1.2 User Login (FR-002)
-**Description:** Authenticate users and provide access to appropriate features.
+**Description:** Authenticate users and provide access to appropriate features based on roles.
 
 **Requirements:**
 - Login using email and password
 - Role-based access control (Student/Admin)
-- Session management with authentication tokens
-- Automatic logout after inactivity
-- Remember user session across browser sessions
+- Session management with authentication tokens (24-hour expiry)
+- Automatic logout after token expiration
+- Persistent session storage in browser localStorage
+- Secure token transmission via Authentication-Token header
 
 **Acceptance Criteria:**
-- Valid credentials grant access to appropriate dashboard
-- Invalid credentials show error message
-- Role-based navigation and feature access
-- Secure token-based authentication
+- Valid credentials grant access to appropriate dashboard (student/admin)
+- Invalid credentials show specific error messages
+- Role-based navigation and feature access enforced
+- Secure token-based authentication with Flask-Security-Too
+- Token automatically included in API requests
 
 #### 3.1.3 User Logout (FR-003)
 **Description:** Allow users to securely terminate their session.
@@ -149,13 +157,14 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 - Document upload verification
 - Convert draft status to "pending"
 - Confirmation message with application ID
-- Prevent multiple submissions
+- Prevent multiple pending submissions (only one pending application per student)
 
 **Acceptance Criteria:**
 - All required fields must be filled before submission
 - Both documents must be uploaded
 - Application status changes to "pending"
 - Student receives confirmation with unique application ID
+- System prevents submission if student already has a pending application
 
 #### 3.2.4 Application Status Tracking (FR-007)
 **Description:** Enable students to track their application progress.
@@ -275,38 +284,45 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 - Responsive design for all devices
 
 #### 3.5.2 Admin Dashboard (FR-014)
-**Description:** Provide administrators with comprehensive overview and management tools.
+**Description:** Provide administrators with comprehensive overview and management tools with real-time statistics.
 
 **Requirements:**
-- Application statistics and metrics
-- Recent activity feed
-- Quick access to review functions
-- System analytics and reports
-- User management capabilities
+- Application statistics and metrics (total, pending, approved, rejected, draft)
+- Recent activity feed and trends analysis
+- Quick access to review functions and user management
+- System analytics including approval rates and processing times
+- User management capabilities with account activation/deactivation
+- Monthly trend charts for applications and user registrations
+- Top courses analysis and pending review queue
+- System health indicators and performance metrics
 
 **Acceptance Criteria:**
-- Real-time statistics display
-- Easy access to all administrative functions
-- Visual charts and graphs for data
-- Comprehensive activity tracking
+- Real-time statistics display with automatic updates
+- Easy navigation to all administrative functions
+- Visual charts and graphs for trend data
+- Comprehensive activity tracking with timestamps
+- Dashboard loads within 3 seconds
+- Responsive design for various screen sizes
 
 ### 3.6 System Administration
 
 #### 3.6.1 User Management (FR-015)
-**Description:** Enable system administrators to manage user accounts.
+**Description:** Enable system administrators to manage user accounts and create additional admin users.
 
 **Requirements:**
-- View all user accounts
-- Role assignment and modification
-- Account activation/deactivation
-- Password reset capabilities
-- User activity monitoring
+- View all user accounts with search and filtering capabilities
+- Account activation/deactivation (except self-deactivation for admins)
+- Create additional administrator accounts (admin-only function)
+- User activity monitoring and statistics
+- Role verification and management
+- User registration trend analysis
 
 **Acceptance Criteria:**
-- Complete user listing with search and filter
-- Role changes take effect immediately
-- Account status changes reflected in system access
+- Complete user listing with search and filter functionality
+- Account status changes take effect immediately
+- Admin creation requires existing admin privileges
 - Activity logs maintained for audit purposes
+- Cannot deactivate own admin account
 
 #### 3.6.2 System Configuration (FR-016)
 **Description:** Allow administrators to configure system settings.
@@ -314,9 +330,9 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 **Requirements:**
 - Application deadlines management
 - System announcements
-- Email notification settings
 - Document upload limits
 - Security parameter configuration
+- User role management
 
 **Acceptance Criteria:**
 - Configuration changes apply system-wide
@@ -335,11 +351,12 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 - **Database Performance:** Query response time under 1 second
 
 ### 4.2 Security Requirements
-- **Authentication:** Secure token-based authentication
-- **Authorization:** Role-based access control
-- **Data Protection:** Encryption for sensitive data
-- **Input Validation:** SQL injection and XSS prevention
-- **Session Management:** Secure session handling with timeout
+- **Authentication:** Flask-Security-Too with Argon2 password hashing and secure token-based authentication
+- **Authorization:** Role-based access control with student and administrator roles
+- **Data Protection:** Secure binary storage for sensitive documents in database
+- **Input Validation:** Comprehensive server-side validation, SQL injection and XSS prevention
+- **Session Management:** Secure token handling with 24-hour expiration and proper cleanup
+- **File Security:** File type and size validation for uploads (PDF/JPG/PNG, max 10MB)
 
 ### 4.3 Usability Requirements
 - **User Interface:** Intuitive and responsive design
@@ -365,18 +382,20 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 ## 5. BUSINESS RULES
 
 ### 5.1 Application Business Rules
-1. Each student can have only one active application at a time
+1. Each student can have only one pending application at a time
 2. Applications cannot be modified after submission (pending status)
 3. Draft applications can be saved without complete information
 4. Submitted applications require all mandatory fields and documents
 5. Application ID is unique and auto-generated
 
 ### 5.2 User Business Rules
-1. Email addresses must be unique across all users
+1. Email addresses and phone numbers must be unique across all users
 2. Students can only view and manage their own applications
-3. Administrators can view and manage all applications
+3. Administrators can view and manage all applications and user accounts
 4. Phone numbers must be exactly 10 digits for registration
-5. Passwords must meet minimum security requirements
+5. Passwords must meet minimum security requirements (6+ characters)
+6. Admin users can create additional admin accounts
+7. Admin users cannot deactivate their own accounts
 
 ### 5.3 Document Business Rules
 1. Maximum file size of 10MB per document
@@ -399,9 +418,10 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 ### 6.1 Assumptions
 - Users have basic computer literacy and internet access
 - Modern web browsers are available to all users
-- Email system is available for notifications
 - University branding and content are provided
 - Database server has sufficient storage capacity
+- Single administrator setup is sufficient for initial deployment
+- No email integration required for basic functionality
 
 ### 6.2 Constraints
 - Budget limitations for infrastructure
@@ -450,7 +470,9 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 
 - **Admission Letter/Offer Letter:** Official PDF document confirming admission approval, generated automatically by the system
 
-- **JWT (JSON Web Token):** A secure method for transmitting information between parties as a JSON object, used for session management
+- **Flask-Security-Too Token:** Authentication token generated by Flask-Security-Too framework for secure session management, with 24-hour expiration and automatic cleanup
+
+- **JWT (JSON Web Token):** A secure method for transmitting information between parties as a JSON object (Note: This system uses Flask-Security-Too tokens instead of JWT)
 
 - **Multi-step Form:** A user interface pattern that breaks long forms into sequential sections or steps to improve user experience
 
@@ -481,17 +503,21 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 ## 9. APPENDICES
 
 ### Appendix A: System Architecture Overview
-- Frontend: Vue.js 3 with Composition API and Pinia state management
-- Backend: Flask RESTful API with SQLAlchemy ORM
-- Database: MySQL with normalized schema design
-- Authentication: Flask-Security with JWT tokens
-- File Storage: Binary storage in database with base64 encoding
+- Frontend: Vue.js 3 with Composition API and Bootstrap 5 for responsive design
+- Backend: Flask RESTful API with SQLAlchemy ORM and application factory pattern
+- Database: MySQL with normalized schema design and automatic database creation
+- Authentication: Flask-Security-Too with Argon2 password hashing and token-based authentication
+- File Storage: Binary storage in database using LargeBinary fields (direct blob storage)
+- PDF Generation: ReportLab library for admission letter generation
+- CORS: Flask-CORS for secure cross-origin requests
 
 ### Appendix B: API Endpoints Summary
-- Authentication: /api/auth/login, /api/auth/register, /api/auth/logout
-- Applications: /api/application/submit, /api/application/save-draft, /api/application/get-draft
-- Admin: /api/application/admin/list, /api/application/admin/review, /api/application/admin/stats
+- Authentication: /api/auth/login, /api/auth/register, /api/auth/logout, /api/auth/profile, /api/auth/create-admin
+- Applications: /api/application/submit, /api/application/save-draft, /api/application/get-draft, /api/application/my-applications
+- Admin: /api/application/admin/list-all, /api/application/admin/review, /api/application/admin/stats, /api/auth/admin/dashboard
 - Documents: /api/application/download-document, /api/application/download-offer-letter
+- User Management: /api/auth/admin/users, /api/auth/admin/user/{id}/toggle-status
+- System: /health, / (API info)
 
 ### Appendix C: Database Schema Overview
 - Users table with role assignments
