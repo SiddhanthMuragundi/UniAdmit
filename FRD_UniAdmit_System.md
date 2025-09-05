@@ -432,49 +432,49 @@ The UniAdmit University Admission Management System is a comprehensive web-based
 
 ## 8. GLOSSARY
 
-**Admin Dashboard:** A centralized interface providing administrators with tools to manage applications, users, and system settings
+- **Admin Dashboard:** A centralized interface providing administrators with tools to manage applications, users, and system settings
 
-**Application:** A formal request for admission submitted by a student containing personal information, academic details, and supporting documents
+- **Application:** A formal request for admission submitted by a student containing personal information, academic details, and supporting documents
 
-**Application Status:** The current state of an application in the workflow (Draft, Pending, Under Review, Approved, Rejected)
+- **Application Status:** The current state of an application in the workflow (Draft, Pending, Under Review, Approved, Rejected)
 
-**Authentication:** The process of verifying user identity through credentials (email and password)
+- **Authentication:** The process of verifying user identity through credentials (email and password)
 
-**Authorization:** The process of determining what resources and actions an authenticated user is permitted to access
+- **Authorization:** The process of determining what resources and actions an authenticated user is permitted to access
 
-**Binary Storage:** Method of storing files (documents, images) as binary data directly in the database
+- **Binary Storage:** Method of storing files (documents, images) as binary data directly in the database
 
-**Dashboard:** A user interface that provides an overview of key information and quick access to main functions
+- **Dashboard:** A user interface that provides an overview of key information and quick access to main functions
 
-**Draft:** An incomplete application that has been saved for later completion and submission
+- **Draft:** An incomplete application that has been saved for later completion and submission
 
-**Admission Letter/Offer Letter:** Official PDF document confirming admission approval, generated automatically by the system
+- **Admission Letter/Offer Letter:** Official PDF document confirming admission approval, generated automatically by the system
 
-**JWT (JSON Web Token):** A secure method for transmitting information between parties as a JSON object, used for session management
+- **JWT (JSON Web Token):** A secure method for transmitting information between parties as a JSON object, used for session management
 
-**Multi-step Form:** A user interface pattern that breaks long forms into sequential sections or steps to improve user experience
+- **Multi-step Form:** A user interface pattern that breaks long forms into sequential sections or steps to improve user experience
 
-**ORM (Object-Relational Mapping):** A programming technique that converts data between incompatible type systems using object-oriented programming languages
+- **ORM (Object-Relational Mapping):** A programming technique that converts data between incompatible type systems using object-oriented programming languages
 
-**PDF Generation:** Automated creation of PDF documents (admission letters) using the ReportLab library
+- **PDF Generation:** Automated creation of PDF documents (admission letters) using the ReportLab library
 
-**Responsive Design:** Web design approach that ensures optimal viewing experience across different devices and screen sizes
+- **Responsive Design:** Web design approach that ensures optimal viewing experience across different devices and screen sizes
 
-**Role-based Access Control (RBAC):** Security model that restricts system access based on assigned user roles (Student, Administrator)
+- **Role-based Access Control (RBAC):** Security model that restricts system access based on assigned user roles (Student, Administrator)
 
-**Session Management:** Handling user login sessions, authentication state, and security tokens
+- **Session Management:** Handling user login sessions, authentication state, and security tokens
 
-**SQLAlchemy:** Python SQL toolkit and ORM providing database abstraction layer
+- **SQLAlchemy:** Python SQL toolkit and ORM providing database abstraction layer
 
-**Stakeholder:** Individual or group with interest in or influence over the project (students, administrators, system administrators)
+- **Stakeholder:** Individual or group with interest in or influence over the project (students, administrators, system administrators)
 
-**Upload Validation:** Process of checking uploaded files for format, size, and content requirements
+- **Upload Validation:** Process of checking uploaded files for format, size, and content requirements
 
-**User Role:** A designation that determines a user's permissions and access level within the system
+- **User Role:** A designation that determines a user's permissions and access level within the system
 
-**Vue.js:** Progressive JavaScript framework used for building user interfaces and single-page applications
+- **Vue.js:** Progressive JavaScript framework used for building user interfaces and single-page applications
 
-**Workflow:** The sequence of processes through which an application passes from submission to final decision
+- **Workflow:** The sequence of processes through which an application passes from submission to final decision
 
 ---
 
